@@ -1,0 +1,20 @@
+# Ignore all large video files
+*.mp4
+*.mov
+*.mkv
+*.avi
+outputs/videos/*.mp4
+outputs/videos/
+
+# Python & Environment
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# System and logs
+*.log
+.DS_Store
+Thumbs.db

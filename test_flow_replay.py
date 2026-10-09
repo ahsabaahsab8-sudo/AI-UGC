@@ -1,0 +1,39 @@
+import httpx
+import json
+import urllib.parse
+import re
+
+cookies_str = "SEARCH_SAMESITE=CgQImKEB; APISID=iNO7dKWjF9AL9IFX/AEd8UG5y5_rzPWjiW; SAPISID=1BgtIeSn6kvarlj_/A6kOa1ObRUwrmiUeZ; __Secure-1PAPISID=1BgtIeSn6kvarlj_/A6kOa1ObRUwrmiUeZ; __Secure-3PAPISID=1BgtIeSn6kvarlj_/A6kOa1ObRUwrmiUeZ; OGPC=19024362-1:; OGP=-19024362:; SID=g.a000CgktBz1hkFxkCYdRNrCY3ls6LC1sohb9xz3z9IJSa8uBClWeNgFpRsWDLmBu3GZ1GQlS8wACgYKAUwSARUSFQHGX2MiD78wwY_MZ_YLC0bTeOZBMBoVAUF8yKrtWf_F2GRfEMvNEcMp6q6k0076; _ga=GA1.1.550855277.1790061987; _ga_X2GNH8R5NS=GS2.1.s1790061987$o1$g1$t1790063016$j60$l0$h730365438; SIDCC=AKEyXzU4HIcHVnKEi4WppwMAO4BINSzjI292GBZnKkvqLsb1TBZ0bVTYASpNcOJrSS9wIMHmnA"
+
+cookies = {}
+for item in cookies_str.split("; "):
+    if "=" in item:
+        k, v = item.split("=", 1)
+        cookies[k] = v
+
+url = "https://flow.google-b197145817.com/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=ogiZ0b&source-path=%2Fproject%2Faf8f43f9-b79b-45e6-a331-12efb66f0fb9&bl=boq_labs-ai-sandbox-frontend_20260920.04_p1&f.sid=4322680810250084447&hl=en-US&_reqid=19201585&rt=c"
+
+# Raw payload captured from browser
+body = "f.req=%5B%5B%5B%22ogiZ0b%22%2C%22%5Bnull%2C%5B%5Bnull%2Cnull%2Cnull%2C1972749736%2C2%2C%5C%22NARWHAL%5C%22%2Cnull%2C%5Bnull%2C22%2Cnull%2Cnull%2Cnull%2C%5C%22af8f43f9-b79b-45e6-a331-12efb66f0fb9%5C%22%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5C%220cAFcWeA44O37PpZcwpq-es-jzJphU0aTsXBHy1k3NyWzKvha35pGYVTYqvGljpzDK6Pup2lijJAJMo5JV1PBFYFa8FgoTI6rBqxdNsI6a4wZdurK_ubDbof74HnndvmzjXkAONBm1PsQopevwcvcYWE1KHn4zpJrFyywqEz0ecsGoAsYq_-pFaUWfMJfuHRKhQJ6EspDLAm6fUs1YrKQdSJ2hdrAWaoOlaunm57GaVyYo_1WjMgCLFTnrOwInRT-6Wf42wAQuHIOrUXoHVA83ai0-dpPobTNecH-DjRZ6feXJZkF_h6hTPnKAhrCIxcoV2DbdjXGOvaG3kbWNcw7aMitPWltPYX7jPTv2vbGoFf5CL9ewN3llI-xdG54tw60quo0BrcemuI2jjOtnG2_mSRtmiGbmZoeedoFisbUm5j4rSRrEaYPCQ1B8RTyvBFRWFbZAsYiXJxV9IGGGOrRrfDsVwHhD8HcKT-YJYPNfAHw6jOwA277GkLCT_E8fA-8ZDrQyNMeVDIWaHJTw7h26vTr1VoxKl0VLAe1ZgqN38ZpIjr7PP5kvqjG7HeCNShI4WEAUUghHzbhDCnEFRC9FhVADeu5T0XPQeOSbPc7rbsdqN9omEho3xe7gFIaGjCEKvWCcJIhYXj8YALjm-IZwRgOJtcY_ERQq-w5AB46rUPZHYtBFqI02A2SVeKaiRonT2QV3SIWXo2zHjOVfPWzoI87qBZ6aJw0JhUQ46mtYLe073-gYgaOyNslAXp2VwWtePZ0xDK9SF-gblOIEI5-2XshkzoNaVrjTavByFurFtFPhqwOb3lLclMdRUzxOnE0KpuBjntgvR2PPZ9PkjYort8dlHKNF2fihwtf3m6M-j_56Fp0J_ICnnyhyD0wXINXS9TZ84qAr_SRZ64kPPRIRpjooQB8MJiNPccQKI_x3youu1X7FsOGF3L9h8uj0bt-2Fub4HToXIZhBnVE4dFoyn2PCaAM0EySBVL_1E6LlYzSVW-wzB8mQsAr0Q9l7Oo7CxNDAg3pdHtHd4oBXDKTywITyL2erTYShGeTn0trMunbqtxHm0DYd3P15hWc-vsUM_ZdFdycns4tA1tbNW5GUQ_qBK88NX6iqCdfXCRS9MgB2ATePgh1-EDejbT5lkbUNIr__lnLPKjogeo4IUowOvSTyzkMFzxtiObhE9eJHsSqYuLNvityrLFPd5cZDKrDYejnr-La5SFdXNZI3YcHEEOr_nh-l3oeNMUsl5AHEFRa_IfDQwdPmh8-F3kMDS1AkFY4U51Sd6QNfvM2BxPrGQkjM0GlKp4hmmJT37bxq_O__IaRYrj54z5nOBCxcQj5MXbGKQM_AG_SdWGixMyxlTXhhvvGVKLRAxD66Y7N18DgDYVbvlTUcoAKOsSwM5trPyNNDQxTR2iXEEiS2ihXu6Q_aZc8Th6RGauQfPsCOjkjiO4ku13X82KGhFhRo_W2pupPRAmipkN2kdLTRoz8N81tFsTWdC7v_yaP2ijLnReGHru9yZ-GnUo0R1AElvvVoz9XB_a01k3Yahw_ar_86hFppHVyj-d_KN9a2tfzxcOaq10DJqcfLJJuHOMzOdAMoxadGGB5UCG2vKAf-nYBsAoRTnOfp9_AzrQjAi3sd3NiRJW3ZQjtczsgX1-YGNtGBwDoHTZWBCAp1yqHNpFeZQwUIjkYlnu_NtbXwS9Rmnv8a6ZHLyPzk4kA5u6fjqLd4Tw8UndSx8NwiJoWsVJOFxsTtPeBR8pa7gSxWAmFz5z4sMw7oUTzaiYnNL4ZIyW1llKKvPycbnPRalYDcmfeYxGcoZyITKTGq1EUxYB7662mcKcf8pSWZxxw7vROL9YVhzjJ1K9Xae8i4Kf1O6eKcHBKdtDd3NL2sY5mGvPy2s-jDh3Ki1mLzefGLKSGdrbZQwARYMBR2uDtvqz7HSX6_Xrhf1YijbHh5VvyHYBAeoyXsJ30Rhw7ZBSnqKrvv2S9waxcTRcBxxE1ACO6vpdy24bGfwiS2bXNKJC-bCRQn6_XlaY_kHDsBrfWgkIpOecrMxUuLl7BRrIzUaVln3Bryng0nQkXbyDcS8sNMJTkvB9_P86Q6ED-dIFFdqpigRcZHINTobwkr3_Fxhd6ur_TGbqdPrn7WguhVhNw30r1Gt1ZEAvhSftSba36AtP-6vdmi6QtyFGK1HYi8i2ty1A1rlBKMRzuhKUd8uz4vUAwS-dCie-mzS062aq8qIBvnbDUQESsNjk2leB5v1QJ5OqiyUMycB-utbft5XsVkgbXDSWi9cd8d-ZCxmP-yLnLQqb4n-Fk9c-NzedayChndubIrAZTsxDWibOfggJzJsyWvZthF74tvXlH-2Y9aezn3RDXmroT98j0pSPG_%5C%22%2C1%5D%5D%2C%5B%5B%5B%5C%22create%20an%20image%20of%20boy%20dancing%20%5C%22%5D%5D%5D%2Cnull%2Cnull%2Cnull%2C%5C%22A38B0A52-7AD9-4F6B-B0F9-F45EC671153E%5C%22%2C%5C%22DD9CD6C2-3EDA-4100-92C0-B53EE14DBDA1%5C%22%5D%5D%2C1%2C%5Bnull%2C22%2Cnull%2Cnull%2Cnull%2C%5C%22af8f43f9-b79b-45e6-a331-12efb66f0fb9%5C%22%2Cnull%2Cnull%2Cnull%2Cnull%2C%5B%5C%220cAFcWeA44O37PpZcwpq-es-jzJphU0aTsXBHy1k3NyWzKvha35pGYVTYqvGljpzDK6Pup2lijJAJMo5JV1PBFYFa8FgoTI6rBqxdNsI6a4wZdurK_ubDbof74HnndvmzjXkAONBm1PsQopevwcvcYWE1KHn4zpJrFyywqEz0ecsGoAsYq_-pFaUWfMJfuHRKhQJ6EspDLAm6fUs1YrKQdSJ2hdrAWaoOlaunm57GaVyYo_1WjMgCLFTnrOwInRT-6Wf42wAQuHIOrUXoHVA83ai0-dpPobTNecH-DjRZ6feXJZkF_h6hTPnKAhrCIxcoV2DbdjXGOvaG3kbWNcw7aMitPWltPYX7jPTv2vbGoFf5CL9ewN3llI-xdG54tw60quo0BrcemuI2jjOtnG2_mSRtmiGbmZoeedoFisbUm5j4rSRrEaYPCQ1B8RTyvBFRWFbZAsYiXJxV9IGGGOrRrfDsVwHhD8HcKT-YJYPNfAHw6jOwA277GkLCT_E8fA-8ZDrQyNMeVDIWaHJTw7h26vTr1VoxKl0VLAe1ZgqN38ZpIjr7PP5kvqjG7HeCNShI4WEAUUghHzbhDCnEFRC9FhVADeu5T0XPQeOSbPc7rbsdqN9omEho3xe7gFIaGjCEKvWCcJIhYXj8YALjm-IZwRgOJtcY_ERQq-w5AB46rUPZHYtBFqI02A2SVeKaiRonT2QV3SIWXo2zHjOVfPWzoI87qBZ6aJw0JhUQ46mtYLe073-gYgaOyNslAXp2VwWtePZ0xDK9SF-gblOIEI5-2XshkzoNaVrjTavByFurFtFPhqwOb3lLclMdRUzxOnE0KpuBjntgvR2PPZ9PkjYort8dlHKNF2fihwtf3m6M-j_56Fp0J_ICnnyhyD0wXINXS9TZ84qAr_SRZ64kPPRIRpjooQB8MJiNPccQKI_x3youu1X7FsOGF3L9h8uj0bt-2Fub4HToXIZhBnVE4dFoyn2PCaAM0EySBVL_1E6LlYzSVW-wzB8mQsAr0Q9l7Oo7CxNDAg3pdHtHd4oBXDKTywITyL2erTYShGeTn0trMunbqtxHm0DYd3P15hWc-vsUM_ZdFdycns4tA1tbNW5GUQ_qBK88NX6iqCdfXCRS9MgB2ATePgh1-EDejbT5lkbUNIr__lnLPKjogeo4IUowOvSTyzkMFzxtiObhE9eJHsSqYuLNvityrLFPd5cZDKrDYejnr-La5SFdXNZI3YcHEEOr_nh-l3oeNMUsl5AHEFRa_IfDQwdPmh8-F3kMDS1AkFY4U51Sd6QNfvM2BxPrGQkjM0GlKp4hmmJT37bxq_O__IaRYrj54z5nOBCxcQj5MXbGKQM_AG_SdWGixMyxlTXhhvvGVKLRAxD66Y7N18DgDYVbvlTUcoAKOsSwM5trPyNNDQxTR2iXEEiS2ihXu6Q_aZc8Th6RGauQfPsCOjkjiO4ku13X82KGhFhRo_W2pupPRAmipkN2kdLTRoz8N81tFsTWdC7v_yaP2ijLnReGHru9yZ-GnUo0R1AElvvVoz9XB_a01k3Yahw_ar_86hFppHVyj-d_KN9a2tfzxcOaq10DJqcfLJJuHOMzOdAMoxadGGB5UCG2vKAf-nYBsAoRTnOfp9_AzrQjAi3sd3NiRJW3ZQjtczsgX1-YGNtGBwDoHTZWBCAp1yqHNpFeZQwUIjkYlnu_NtbXwS9Rmnv8a6ZHLyPzk4kA5u6fjqLd4Tw8UndSx8NwiJoWsVJOFxsTtPeBR8pa7gSxWAmFz5z4sMw7oUTzaiYnNL4ZIyW1llKKvPycbnPRalYDcmfeYxGcoZyITKTGq1EUxYB7662mcKcf8pSWZxxw7vROL9YVhzjJ1K9Xae8i4Kf1O6eKcHBKdtDd3NL2sY5mGvPy2s-jDh3Ki1mLzefGLKSGdrbZQwARYMBR2uDtvqz7HSX6_Xrhf1YijbHh5VvyHYBAeoyXsJ30Rhw7ZBSnqKrvv2S9waxcTRcBxxE1ACO6vpdy24bGfwiS2bXNKJC-bCRQn6_XlaY_kHDsBrfWgkIpOecrMxUuLl7BRrIzUaVln3Bryng0nQkXbyDcS8sNMJTkvB9_P86Q6ED-dIFFdqpigRcZHINTobwkr3_Fxhd6ur_TGbqdPrn7WguhVhNw30r1Gt1ZEAvhSftSba36AtP-6vdmi6QtyFGK1HYi8i2ty1A1rlBKMRzuhKUd8uz4vUAwS-dCie-mzS062aq8qIBvnbDUQESsNjk2leB5v1QJ5OqiyUMycB-utbft5XsVkgbXDSWi9cd8d-ZCxmP-yLnLQqb4n-Fk9c-NzedayChndubIrAZTsxDWibOfggJzJsyWvZthF74tvXlH-2Y9aezn3RDXmroT98j0pSPG_%5C%22%2C1%5D%5D%2C%5B%5C%22D208539A-B0F8-4867-B943-DF2473F32BAF%5C%22%5D%5D%22%2Cnull%2C%22generic%22%5D%5D%5D&at=AIQ-s5gZsdCOwYRS55FvOZidEJyW%3A1790062018173&"
+
+headers = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.8010.52 Safari/537.36",
+    "Content-Type": "application/x-www-form-urlencoded;charset=utf-8",
+    "X-Same-Domain": "1",
+    "Origin": "https://flow.google-b197145817.com",
+    "Referer": "https://flow.google-b197145817.com/project/af8f43f9-b79b-45e6-a331-12efb66f0fb9/"
+}
+
+print("Testing direct Google Flow batchexecute replay...")
+try:
+    res = httpx.post(url, content=body, headers=headers, cookies=cookies, timeout=30.0)
+    print("Status Code:", res.status_code)
+    print("Response Length:", len(res.text))
+    print("Preview:\n", res.text[:500])
+    
+    # Check if image URLs or base64 are present
+    urls = re.findall(r'https?://[^\s"\'\]\\]+', res.text)
+    image_urls = [u for u in urls if any(ext in u.lower() for ext in ['.png', '.jpg', '.jpeg', '.webp', 'googleusercontent'])]
+    print("Found image URLs:", image_urls)
+except Exception as e:
+    print("Error:", e)

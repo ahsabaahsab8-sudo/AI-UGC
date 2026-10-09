@@ -1,0 +1,17 @@
+[Unit]
+Description=AI UGC Ads Generation Agent Worker
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/ai-ugc
+ExecStart=/root/ai-ugc/venv/bin/python main.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/root/ai-ugc/.env
+StandardOutput=append:/var/log/ugc-agent.log
+StandardError=append:/var/log/ugc-agent-error.log
+
+[Install]
+WantedBy=multi-user.target
